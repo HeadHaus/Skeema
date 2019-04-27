@@ -1,3 +1,5 @@
+from typing import Any
+
 class HandleValidationException(Exception):
     def __init__(self, handle_manager, handle, msg=None):
         if msg is None:
@@ -47,21 +49,21 @@ class Handle:
     """
 
     INVALID_INDEX = ~0x0
-    ZEROETH_GENERATION = 0
+    ZEROTH_GENERATION = 0
 
-    def __init__(self, index=INVALID_INDEX, generation=ZEROETH_GENERATION):
+    def __init__(self, index: int = INVALID_INDEX, generation: int = ZEROTH_GENERATION) -> None:
         self._index = index
         self._generation = generation
 
     @property
-    def index(self):
+    def index(self) -> int:
         return self._index
 
     @property
-    def generation(self):
+    def generation(self) -> int:
         return self._generation
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return (
             self._index == other.index
             and self._generation == other.generation

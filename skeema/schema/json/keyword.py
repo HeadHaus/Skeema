@@ -41,23 +41,31 @@ class Type(Keyword):
         class_type = self.data
         class_context.class_type = class_type
 
-        if class_type is not 'object' and class_type is not 'null':
-            class_context.base_classes.append(class_type.capitalize())
+        if class_type is 'object' or class_type is 'null':
+            return True
 
-            data_member_values = dict()
-            data_member_values['name'] = "value"
-            data_member_values['klass'] = class_type.capitalize()
-            data_member = DataMember(**data_member_values)
-            class_context.add_data_member(data_member)
+        is_array = False
+        klass = class_type.capitalize()
 
-            constructor_parameter_values = dict()
-            constructor_parameter_values['name'] = "value"
-            constructor_parameter_values['klass'] = class_type.capitalize()
-            constructor_parameter_values['data_member'] = data_member
-            constructor_parameter_values['required'] = False
-            constructor_parameter_values['array'] = False
-            parameter = Parameter(**constructor_parameter_values)
-            class_context.add_constructor_parameter(parameter)
+        if class_type is 'array':
+            is_array = True
+
+        class_context.base_classes.append(klass)
+
+        data_member_values = dict()
+        data_member_values['name'] = "value"
+        data_member_values['klass'] = klass
+        data_member = DataMember(**data_member_values)
+        class_context.add_data_member(data_member)
+
+        constructor_parameter_values = dict()
+        constructor_parameter_values['name'] = "value"
+        constructor_parameter_values['klass'] = klass
+        constructor_parameter_values['data_member'] = data_member
+        constructor_parameter_values['required'] = False
+        constructor_parameter_values['array'] = is_array
+        parameter = Parameter(**constructor_parameter_values)
+        class_context.add_constructor_parameter(parameter)
 
         return True
 

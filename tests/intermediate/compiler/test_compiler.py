@@ -1,8 +1,8 @@
 import pytest
 from inspect import signature, Parameter, _ParameterKind
 
-from skeema.json.schema_manager import SchemaManager
-from skeema.compiler.compiler import Compiler
+from skeema.schema.json import SchemaManager
+from skeema.intermediate.compiler.compiler import Compiler
 
 
 @pytest.fixture(name='compiler')
@@ -13,18 +13,6 @@ def create_compiler():
 @pytest.fixture(name='manager')
 def create_manager():
     return SchemaManager()
-
-
-@pytest.fixture(name='object_context')
-def object_context(manager):
-    json = {
-        "type": "object",
-        "properties": {
-            "name": {"type": "string"}
-        }
-    }
-    schema = manager.create_schema('schemas/test/object.json', 'TestObject', json)
-    return schema.compile()
 
 
 class TestCompiler:
@@ -130,7 +118,7 @@ class TestCompiler:
             assert person.age == 26
             assert person.married is False
 
-        def test_creates_class_from_object_with_ref(self, compiler, manager):
+        def test_creates_class_from_object_with_references(self, compiler, manager):
             person_kv = {
                 "type": "object",
                 "properties": {

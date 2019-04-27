@@ -1,7 +1,10 @@
 import pytest
 
-from skeema.dependency.dependency import Dependency, DependencyHasNoNodeException
-from skeema.dependency.dependency_graph import CircularDependencyException
+from skeema.core.dependency import (
+    Dependency,
+    DependencyHasNoNodeException,
+    CircularDependencyException
+)
 from skeema.core.container import Container
 
 

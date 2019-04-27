@@ -20,16 +20,16 @@ class Schema(Base):
     def properties(self):
         return self.key_value_definition.get("properties")
 
-    def _find_dependencies(self):
-        dependencies = [ref for ref in Schema.search_definition(self.key_value_definition, "$ref")]
-        return dependencies
-
     def _precompile(self, compilation_context):
         self._create_definition_schemas()
 
     def _create_definition_schemas(self):
-        # Create schemas out of the inline class definitions.
-        # Inline class schemas do not count as referenced dependencies until an explicit $ref is made.
+        """
+        Create schemas out of the inline class definitions.
+        Inline class schemas do not count as referenced dependencies until an explicit $ref is made.
+
+        :return:
+        """
         raw_schema = {}
         if self.definitions is not None:
             raw_schema = self.definitions
@@ -82,6 +82,7 @@ class Schema(Base):
                 # Instead of mapping the property to an anonymous class that contains only the "allOf" definition and
                 # no properties, it is more useful to the user to map the property to the final combined class that is
                 # assembled from the list of classes defined in the "allOf" definition.
+
                 if "allOf" in property_definition:
                     self._property_map[property_name] = f"{class_name}_allOf"
                 else:

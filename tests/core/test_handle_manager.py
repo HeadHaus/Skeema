@@ -13,7 +13,7 @@ def create_handle_manager():
 
 class TestHandleManager:
     def test_manager_starts_with_no_active_handles(self, manager):
-        assert manager.active_handles == 0
+        assert manager.num_active_handles == 0
 
     class TestIssueHandle:
         def test_returns_new_handle(self, manager):
@@ -23,12 +23,12 @@ class TestHandleManager:
 
         def test_returns_valid_handle(self, manager):
             handle = manager.issue_handle()
-            assert manager.validate_handle(handle)
+            manager.validate_handle(handle)
 
         def test_increments_active_count(self, manager):
-            active_handles = manager.active_handles
+            active_handles = manager.num_active_handles
             manager.issue_handle()
-            assert manager.active_handles == active_handles + 1
+            assert manager.num_active_handles == active_handles + 1
 
     class TestRemoveHandle:
         @pytest.fixture(name="handle")
@@ -37,9 +37,9 @@ class TestHandleManager:
             return handle
 
         def test_decrements_active_count(self, manager, handle):
-            active_handles = manager.active_handles
+            active_handles = manager.num_active_handles
             manager.remove_handle(handle)
-            assert manager.active_handles == active_handles - 1
+            assert manager.num_active_handles == active_handles - 1
 
         def test_throws_handle_is_inactive_exception_with_already_removed_handle(self, manager, handle):
             manager.remove_handle(handle)
@@ -57,7 +57,7 @@ class TestHandleManager:
             with pytest.raises(HandleInvalidException):
                 manager.validate_handle(handle)
 
-        def test_handle_throws_handle_oor_exception_with_stranger_handle(self, manager):
+        def test_handle_throws_handle_out_of_range_exception_with_stranger_handle(self, manager):
             stranger_manager = HandleManager()
             handle = stranger_manager.issue_handle()
             with pytest.raises(HandleOutOfRangeException):

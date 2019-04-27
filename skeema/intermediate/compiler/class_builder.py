@@ -4,8 +4,7 @@ from types import FunctionType
 from .operator import itemgetter, itemsetter
 from .node import *
 from skeema import Boolean
-from skeema.intermediate.parameter import Parameter
-from skeema.intermediate.data_member import DataMember
+from skeema.intermediate import DataMember, Parameter
 
 
 def private(name):

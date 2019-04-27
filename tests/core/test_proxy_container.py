@@ -3,7 +3,7 @@ import sys
 
 from skeema.core.handle import INVALID_HANDLE
 from skeema.core.handle import HandleIsInactiveException
-from skeema.core.handle_managed_container import HandleManagedContainer
+from skeema.core.proxy_container import ProxyContainer
 
 
 class MyObject:
@@ -12,7 +12,7 @@ class MyObject:
 
 @pytest.fixture(name="container")
 def create_container():
-    container = HandleManagedContainer()
+    container = ProxyContainer()
     return container
 
 

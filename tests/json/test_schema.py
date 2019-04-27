@@ -3,7 +3,7 @@ import pytest
 from skeema.intermediate.representation import Representation
 from skeema.intermediate.parameter import Parameter
 from skeema.intermediate.data_member import DataMember
-from skeema.json.schema_manager import SchemaManager
+from skeema.schema.json import SchemaManager
 
 
 @pytest.fixture(autouse=True, name='manager')

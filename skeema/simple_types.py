@@ -1,4 +1,7 @@
 import sys
+from typing import TypeVar, List
+
+T = TypeVar('T')
 
 
 class Boolean:
@@ -40,17 +43,18 @@ class String(str):
         return String(v)
 
 
-simple_types = dict()
-simple_types[Boolean.__name__.lower()] = Boolean
-simple_types[Integer.__name__.lower()] = Integer
-simple_types[Number.__name__.lower()] = Number
-simple_types[Null.__name__.lower()] = Null
-simple_types[Object.__name__.lower()] = Object
-simple_types[String.__name__.lower()] = String
+simple_types = [
+    Boolean,
+    Integer,
+    Null,
+    Number,
+    Object,
+    String
+]
 
 SKEEMA_MODULE = 'skeema'
 module = sys.modules[SKEEMA_MODULE]
 
-for t in simple_types.values():
+for t in simple_types:
     t.__module__ = module
     module.__dict__[t.__name__] = t
