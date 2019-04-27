@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .handle import Handle, INVALID_HANDLE
 from .handle import (
     HandleInvalidException,
@@ -7,19 +11,25 @@ from .handle import (
 )
 
 
+class HandleEntry:
+    def __init__(self) -> None:
+        self.active: bool = False
+        self.generation: int = 0
+
+
+if TYPE_CHECKING:
+    from typing import List
+    HandleEntryList = List[HandleEntry]
+
+
 class HandleManager:
     """
     Handle Manager
     """
 
-    class HandleEntry:
-        def __init__(self) -> None:
-            self.active = False
-            self.generation = 0
-
     def __init__(self) -> None:
-        self._num_active_handles = 0
-        self._entries = list()
+        self._num_active_handles: int = 0
+        self._entries: HandleEntryList = list()
 
     @property
     def num_entries(self) -> int:
@@ -35,15 +45,17 @@ class HandleManager:
         :return: The newly issued handle
         """
 
-        index = self._num_active_handles
+        index: int = self._num_active_handles
         # Grow entries list if necessary
         if len(self._entries) == index:
-            handle_entry = HandleManager.HandleEntry()
+            handle_entry: HandleEntry = HandleEntry()
             self._entries.append(handle_entry)
+
         self._entries[index].active = True
         self._entries[index].generation += 1
         self._num_active_handles += 1
-        handle = Handle(index, self._entries[index].generation)
+        handle: Handle = Handle(index, self._entries[index].generation)
+
         return handle
 
     def remove_handle(self, handle: Handle) -> None:
@@ -54,7 +66,7 @@ class HandleManager:
         """
 
         self.validate_handle(handle)
-        index = handle.index
+        index: int = handle.index
         self._entries[index].active = False
         self._num_active_handles -= 1
 
@@ -69,20 +81,20 @@ class HandleManager:
             entry.active = False
 
     def validate_handle(self, handle: Handle) -> None:
-        handle_is_valid = handle != INVALID_HANDLE
+        handle_is_valid: bool = handle != INVALID_HANDLE
         if not handle_is_valid:
             raise HandleInvalidException(self, handle)
 
-        index = handle.index
-        index_is_in_range = index < self.num_entries
+        index: int = handle.index
+        index_is_in_range: bool = index < self.num_entries
         if not index_is_in_range:
             raise HandleOutOfRangeException(self, handle)
 
-        entry = self._entries[index]
-        handle_is_active = entry.active
+        entry: HandleEntry = self._entries[index]
+        handle_is_active: bool = entry.active
         if not handle_is_active:
             raise HandleIsInactiveException(self, handle)
 
-        correct_generation = entry.generation == handle.generation
+        correct_generation: bool = entry.generation == handle.generation
         if not correct_generation:
             raise HandleIsRetiredException(self, handle, entry)

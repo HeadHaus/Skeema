@@ -11,6 +11,7 @@ from .compiler import Compiler
 if TYPE_CHECKING:
     from typing import Dict
 
+    from skeema.core import Handle
     from skeema.types import KeyValueDef
     from skeema.intermediate import CompilationContext
 
@@ -32,20 +33,20 @@ class Schema(Compilable, metaclass=ABCMeta):
         super().__init__()
 
         # SchemaManager
-        self._manager = manager
+        self._manager: SchemaManager = manager
 
         # The url used to identify this schema using references, i.e. $ref
         # Because urls are inherently unique, they also act as the key for schema manager
-        self._url = url
+        self._url: str = url
 
         # The class name defined by the schema
-        self._class_name = class_name
+        self._class_name: str = class_name
 
         # The internal json stored as a KeyValueDefinition
-        self._key_value_definition = key_value_definition
+        self._key_value_definition: KeyValueDef = key_value_definition
 
         # Mapping of properties to class names - used during compilation
-        self._property_map = dict()
+        self._property_map: PropertyNameToClassMap = dict()
 
     @property
     def key_value_definition(self) -> KeyValueDef:
@@ -82,8 +83,8 @@ class Schema(Compilable, metaclass=ABCMeta):
 
         child_dependency_nodes = self.dependency_node.resolve_dependencies()[:-1]
         for child_dependency_node in child_dependency_nodes:
-            handle = child_dependency_node.handle
-            dependency = self._manager.get_schema_from_handle(handle)
+            handle: Handle = child_dependency_node.handle
+            dependency: Schema = self._manager.get_schema_from_handle(handle)
             dependency.compile(compilation_context)
 
         self.compiler.compile(self, compilation_context)

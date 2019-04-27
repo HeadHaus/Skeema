@@ -1,8 +1,18 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from weakref import proxy
 
-from .handle import Handle, HandleValidationException
+from .handle import HandleValidationException
 from .handle_manager import HandleManager
+
+if TYPE_CHECKING:
+    from typing import Any, List
+
+    from .handle import Handle
+
+    ProxyList = List[proxy]
 
 
 class ProxyContainer:
@@ -11,15 +21,18 @@ class ProxyContainer:
     """
 
     def __init__(self) -> None:
-        self._handle_manager = HandleManager()
-        self._object_proxies = []
+        self._handle_manager: HandleManager = HandleManager()
+        self._object_proxies: ProxyList = []
 
     def add_object(self, obj: Any) -> Handle:
-        handle = self._handle_manager.issue_handle()
+        handle: Handle = self._handle_manager.issue_handle()
+
         # Grow object proxies list if needed
         if len(self._object_proxies) == handle.index:
             self._object_proxies.append(None)
+
         self._object_proxies[handle.index] = proxy(obj)
+
         return handle
 
     def get(self, handle: Handle) -> proxy:

@@ -1,7 +1,4 @@
 import sys
-from typing import TypeVar, List
-
-T = TypeVar('T')
 
 
 class Boolean:

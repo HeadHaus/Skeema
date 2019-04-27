@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABCMeta
 from skeema.core.dependency import Dependency
-from skeema.intermediate.compilation_context import CompilationContext
+from skeema.intermediate import CompilationContext
 
 
 class Compilable(Dependency, metaclass=ABCMeta):
@@ -28,17 +28,17 @@ class Compilable(Dependency, metaclass=ABCMeta):
 
     def __init__(self) -> None:
         super().__init__()
-        self._compiled = False
+        self._compiled: bool = False
 
     @property
     def compiled(self) -> bool:
         return self._compiled
 
-    def _precompile(self, compilation_context) -> None:
+    def _precompile(self, compilation_context: CompilationContext) -> None:
         pass
 
     @abstractmethod
-    def _compile(self, compilation_context) -> None:
+    def _compile(self, compilation_context: CompilationContext) -> None:
         pass
 
     def compile(self, compilation_context: CompilationContext = None) -> CompilationContext:
