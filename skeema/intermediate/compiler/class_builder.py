@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from types import FunctionType
 
@@ -5,6 +7,7 @@ from .operator import itemgetter, itemsetter
 from .node import *
 from skeema import Boolean
 from skeema.intermediate import DataMember, Parameter
+from skeema.intermediate.compiler.parser import Parser
 
 
 def private(name):
@@ -17,21 +20,20 @@ class ClassBuilder:
     """
 
     @staticmethod
-    def create_method(method_name: str, signature_node: SignatureNode, body_nodes: [Node]):
-        method_node = MethodNode(signature_node, body_nodes)
-        method_code = compile(
-            method_node(),
+    def compile_function(function_node: FunctionNode):
+        flags = annotations.compiler_flag
+        function_code = compile(
+            function_node(),
             '<skeema>',
-            'exec'
+            'exec',
+            flags=flags
         )
 
-        index = 1
-        if not body_nodes:
-            index = 0
+        num_parameters = len(function_node.signature_node.parameters) - 1
+        index = num_parameters + 1
+        function = FunctionType(function_code.co_consts[index], globals(), function_node.name)
 
-        init_function = FunctionType(method_code.co_consts[index], globals(), method_name)
-
-        return init_function
+        return function
 
     @staticmethod
     def set_class_module(klass, module_name: str):
@@ -98,7 +100,7 @@ class ClassBuilder:
                 parameter['class']
             ) for parameter in parameters]
         parameter_list_nodes = ParameterListNode(parameter_nodes)
-        signature_node = SignatureNode('init', parameter_list_nodes)
+        signature_node = SignatureNode('__init__', parameter_list_nodes)
 
         assignment_pairs = [(parameter['name'], parameter['data_member']) for parameter in parameters]
         assignment_nodes = [
@@ -108,8 +110,14 @@ class ClassBuilder:
             ) for data_member, value in [(p[0], p[1]) for p in assignment_pairs]
         ]
 
-        init = ClassBuilder.create_method('init', signature_node, assignment_nodes)
+        init_node = MethodNode(signature_node, assignment_nodes)
+        init = ClassBuilder.compile_function(init_node)
+        init.__annotations__ = {parameter['name']: parameter['class'] for parameter in parameters}
         cls_dict['__init__'] = init
+
+        def parse(cls, json_str):
+            return Parser.parse(cls, json_str)
+        cls_dict['parse'] = classmethod(parse)
 
         cls = type(
             class_name,

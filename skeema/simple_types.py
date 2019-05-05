@@ -2,42 +2,34 @@ import sys
 
 
 class Boolean:
-    @classmethod
-    def parse(cls, v):
-        return Boolean(v)
+    def __init__(self, value):
+        self._value = value
 
-    def __new__(cls, value=False):
-        return bool(value)
+    def __bool__(self):
+        return bool(self._value)
+
+    def __eq__(self, other):
+        return bool(self._value) == other
 
 
 class Integer(int):
-    @classmethod
-    def parse(cls, v):
-        return Integer(v)
+    pass
 
 
 class Null:
-    @classmethod
-    def parse(cls, _v):
-        return Null()
+    pass
 
 
 class Number(float):
-    @classmethod
-    def parse(cls, v):
-        return Number(v)
+    pass
 
 
 class Object(tuple):
-    @classmethod
-    def parse(cls, v):
-        return Object(**v)
+    pass
 
 
 class String(str):
-    @classmethod
-    def parse(cls, v):
-        return String(v)
+    pass
 
 
 simple_types = [

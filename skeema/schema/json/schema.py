@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 from skeema.schema.schema import Schema as Base
+from skeema.util import to_camel_case
 
 from .compiler import Compiler
 
@@ -36,7 +37,7 @@ class Schema(Base):
         for inline_class_name in raw_schema:
             inline_class_definition = raw_schema[inline_class_name]
             url = urljoin(self.url, f"#/definitions/{inline_class_name}")
-            self._manager.create_schema(url, inline_class_name.capitalize(), inline_class_definition)
+            self._manager.create_schema(url, to_camel_case(inline_class_name), inline_class_definition)
 
     def _populate_dependency_node(self):
         dependency_keywords = (
@@ -68,7 +69,7 @@ class Schema(Base):
                     schema = self._manager.get_schema(dependency_url)
                     class_name = schema.class_name
                 else:
-                    class_name = f"{property_name.capitalize()}Class"
+                    class_name = to_camel_case(f"{property_name}_class")
                     url = f"{self._url}#/properties/{class_name}"
                     schema = self._manager.create_schema(url, class_name, property_definition)
 

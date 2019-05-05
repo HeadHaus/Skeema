@@ -2,6 +2,7 @@ from abc import abstractmethod, ABCMeta
 
 from skeema.intermediate.parameter import Parameter
 from skeema.intermediate.data_member import DataMember
+from skeema.util import to_camel_case
 
 
 class Keyword(metaclass=ABCMeta):
@@ -45,7 +46,7 @@ class Type(Keyword):
             return True
 
         is_array = False
-        klass = class_type.capitalize()
+        klass = to_camel_case(class_type)
 
         if class_type is 'array':
             is_array = True

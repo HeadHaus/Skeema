@@ -1,5 +1,5 @@
 class Parameter:
-    def __init__(self, name, klass, data_member, required=True, array=False):
+    def __init__(self, name: str, klass: str, data_member, required=True, array=False):
         self._name = name
         self._klass = klass
         self._data_member = data_member

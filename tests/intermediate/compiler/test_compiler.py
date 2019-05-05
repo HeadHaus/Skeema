@@ -25,15 +25,13 @@ class TestCompiler:
 
             from skeema import TestBoolean
             parameters = list(signature(TestBoolean).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, default=False)]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Boolean')]
             assert parameters == expected_parameters
 
-            b = TestBoolean()
-            assert b is False
             b = TestBoolean(False)
-            assert b is False
+            assert b == False
             b = TestBoolean(True)
-            assert b is True
+            assert b == True
 
         def test_creates_class_from_integer(self, compiler, manager):
             json = {"type": "integer"}
@@ -43,7 +41,7 @@ class TestCompiler:
 
             from skeema import TestInteger
             parameters = list(signature(TestInteger).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Integer')]
             assert parameters == expected_parameters
 
             i = TestInteger(124)
@@ -69,7 +67,7 @@ class TestCompiler:
             from skeema import TestNumber
 
             parameters = list(signature(TestNumber).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Number')]
             assert parameters == expected_parameters
 
             n = TestNumber(3.141592653)
@@ -84,7 +82,7 @@ class TestCompiler:
             from skeema import TestString
 
             parameters = list(signature(TestString).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='String')]
             assert parameters == expected_parameters
 
             s = TestString('Hello, world!')
@@ -107,16 +105,16 @@ class TestCompiler:
 
             parameters = list(signature(Person).parameters.values())
             expected_parameters = [
-                Parameter('name', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('age', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('married', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)
+                Parameter('name', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='NameClass'),
+                Parameter('age', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='AgeClass'),
+                Parameter('married', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='MarriedClass')
             ]
             assert parameters == expected_parameters
 
             person = Person(name='Brandon', age=26, married=False)
             assert person.name == 'Brandon'
             assert person.age == 26
-            assert person.married is False
+            assert person.married == False
 
         def test_creates_class_from_object_with_references(self, compiler, manager):
             person_kv = {
@@ -146,8 +144,8 @@ class TestCompiler:
 
             parameters = list(signature(Book).parameters.values())
             expected_parameters = [
-                Parameter('title', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('author', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)
+                Parameter('title', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='TitleClass'),
+                Parameter('author', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Person')
             ]
             assert parameters == expected_parameters
 
@@ -184,17 +182,17 @@ class TestCompiler:
 
             parameters = list(signature(Address).parameters.values())
             expected_parameters = [
-                Parameter('address_line_1', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('address_line_2', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('city', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('province', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)
+                Parameter('address_line_1', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='AddressLine1Class'),
+                Parameter('address_line_2', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='AddressLine2Class'),
+                Parameter('city', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='CityClass'),
+                Parameter('province', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='ProvinceClass')
             ]
             assert parameters == expected_parameters
 
             parameters = list(signature(Person).parameters.values())
             expected_parameters = [
-                Parameter('name', kind=_ParameterKind.POSITIONAL_OR_KEYWORD),
-                Parameter('address', kind=_ParameterKind.POSITIONAL_OR_KEYWORD)
+                Parameter('name', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='NameClass'),
+                Parameter('address', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Address')
             ]
             assert parameters == expected_parameters
 

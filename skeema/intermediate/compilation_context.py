@@ -11,3 +11,7 @@ class CompilationContext:
 
     def get_representation(self, name):
         return self._representations.get(name)
+
+    def __str__(self):
+        s = ''.join(str(representation) for representation in self.representations)
+        return s
