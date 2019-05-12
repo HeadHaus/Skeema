@@ -46,16 +46,27 @@ class Type(Keyword):
             return True
 
         is_array = False
-        klass = to_camel_case(class_type)
-
         if class_type is 'array':
             is_array = True
+            items = schema.key_value_definition['items']
+            if type(items) is dict:
+                class_type = items['type']
+            else:
+                self.error_message = 'Invalid array type'
+                return False
 
-        class_context.base_classes.append(klass)
+        klass = to_camel_case(class_type)
+
+        # Do not extend the klass type if the object is an array
+        if is_array:
+            class_context.base_classes.append('Array')
+        else:
+            class_context.base_classes.append(klass)
 
         data_member_values = dict()
         data_member_values['name'] = "value"
         data_member_values['klass'] = klass
+        data_member_values['array'] = is_array
         data_member = DataMember(**data_member_values)
         class_context.add_data_member(data_member)
 

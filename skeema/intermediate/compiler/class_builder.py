@@ -29,9 +29,11 @@ class ClassBuilder:
             flags=flags
         )
 
-        num_parameters = len(function_node.signature_node.parameters) - 1
+        signature_node = function_node.signature_node
+        num_parameters = len(signature_node.parameters) - 1
         index = num_parameters + 1
         function = FunctionType(function_code.co_consts[index], globals(), function_node.name)
+        function.__annotations__ = signature_node.as_dict()
 
         return function
 
@@ -61,25 +63,34 @@ class ClassBuilder:
         cls_dict['__getitem__'] = getitem
 
         data_member_class_map = {
-            data_member['name']: ClassBuilder.class_lookup(module_name, data_member['class']) for data_member in data_members
+            data_member['name']: ClassBuilder.class_lookup(module_name, data_member['class'])
+            for data_member in data_members
         }
 
         def setitem(self, key: str, value: any):
             value_klass = type(value)
             expected_klass = data_member_class_map[key]
 
-            # The value is valid if its class is part of the expected class hierarchy
-            # e.g., str is part of the String hierarchy
-            valid = value_klass in expected_klass.__mro__
-            # The value is valid if it is a bool, and the expected class is part of the Boolean hierarchy
-            valid = valid or (value_klass is bool and issubclass(expected_klass, Boolean))
-            if not valid:
-                raise TypeError(f'Invalid type for {key} = {value}: expected type {expected_klass}, received type {value_klass}')
+            def check_type(_value_klass, _expected_klass):
+                # The value is valid if its class is part of the expected class hierarchy
+                # e.g., str is part of the String hierarchy
+                valid = _value_klass in _expected_klass.__mro__
+                # The value is valid if it is a bool, and the expected class is part of the Boolean hierarchy
+                valid = valid or (_value_klass is bool and issubclass(_expected_klass, Boolean))
+                if not valid:
+                    raise TypeError(
+                        f'Invalid type for {key} = {value}: expected type {_expected_klass}, received type {_value_klass}')
 
-            if value_klass is not expected_klass:
-                # The value class is a sub or supertype.
-                # Cast value to expected class
-                value = expected_klass(value)
+            if value_klass is list:
+                for item in value:
+                    item_klass = type(item)
+                    check_type(item_klass, expected_klass)
+            else:
+                check_type(value_klass, expected_klass)
+                if value_klass is not expected_klass:
+                    # The value class is a sub or supertype.
+                    # Cast value to expected class
+                    value = expected_klass(value)
 
             data_member_name = private(key)
             self.__dict__[data_member_name] = value
@@ -97,24 +108,24 @@ class ClassBuilder:
         parameter_nodes = [
             ParameterNode(
                 parameter['name'],
-                parameter['class']
+                parameter['class'],
+                parameter['array']
             ) for parameter in parameters]
         parameter_list_nodes = ParameterListNode(parameter_nodes)
         signature_node = SignatureNode('__init__', parameter_list_nodes)
 
-        assignment_pairs = [(parameter['name'], parameter['data_member']) for parameter in parameters]
         assignment_nodes = [
             AssignmentNode(
                 ValueNode(f'self.{data_member}'),
                 ValueNode(value)
-            ) for data_member, value in [(p[0], p[1]) for p in assignment_pairs]
+            ) for data_member, value in [(parameter['data_member'], parameter['name']) for parameter in parameters]
         ]
 
         init_node = MethodNode(signature_node, assignment_nodes)
         init = ClassBuilder.compile_function(init_node)
-        init.__annotations__ = {parameter['name']: parameter['class'] for parameter in parameters}
         cls_dict['__init__'] = init
 
+        # Parsing for json
         def parse(cls, json_str):
             return Parser.parse(cls, json_str)
         cls_dict['parse'] = classmethod(parse)

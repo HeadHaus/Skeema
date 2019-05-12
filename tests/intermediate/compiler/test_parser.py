@@ -15,7 +15,8 @@ def create_manager():
     return SchemaManager()
 
 
-def test_parser(manager, compiler):
+@pytest.fixture(autouse=True)
+def setup(manager, compiler):
     person_def = {
         "type": "object",
         "properties": {
@@ -43,32 +44,37 @@ def test_parser(manager, compiler):
     context = schema.compile()
     compiler.compile(context)
 
-    from skeema import Address, Person
+    yield
 
-    person_v = {
-        'firstName': 'Robert',
-        'lastName': 'Dempsey',
-        'age': 34
-    }
-    address_v = {
-        'addressLine1': '1804  Ontario St',
-        'addressLine2': 'Apt 4',
-        'postalCode': 'L2N 1S8',
-        'city': 'St Catharines',
-        'province': 'ON',
-        'owner': person_v
-    }
 
-    json_str = json.dumps(address_v)
+class TestModel:
+    def test_parse(self):
+        person_v = {
+            'firstName': 'Robert',
+            'lastName': 'Dempsey',
+            'age': 34
+        }
+        address_v = {
+            'addressLine1': '1804  Ontario St',
+            'addressLine2': 'Apt 4',
+            'postalCode': 'L2N 1S8',
+            'city': 'St Catharines',
+            'province': 'ON',
+            'owner': person_v
+        }
 
-    addr = Address.parse(json_str)
-    assert addr.addressLine1 == '1804  Ontario St'
-    assert addr.addressLine2 == 'Apt 4'
-    assert addr.postalCode == 'L2N 1S8'
-    assert addr.city == 'St Catharines'
-    assert addr.province == 'ON'
+        json_str = json.dumps(address_v)
 
-    owner = addr.owner
-    assert owner.firstName == 'Robert'
-    assert owner.lastName == 'Dempsey'
-    assert owner.age == 34
+        from skeema import Address, Person
+
+        addr = Address.parse(json_str)
+        assert addr.addressLine1 == '1804  Ontario St'
+        assert addr.addressLine2 == 'Apt 4'
+        assert addr.postalCode == 'L2N 1S8'
+        assert addr.city == 'St Catharines'
+        assert addr.province == 'ON'
+
+        owner = addr.owner
+        assert owner.firstName == 'Robert'
+        assert owner.lastName == 'Dempsey'
+        assert owner.age == 34

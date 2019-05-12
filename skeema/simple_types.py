@@ -1,6 +1,17 @@
 import sys
 
 
+class Array:
+    def __init__(self, value: list):
+        self._value: list = value
+
+    def __eq__(self, other):
+        return self._value == other
+
+    def __iter__(self):
+        return iter(self._value)
+
+
 class Boolean:
     def __init__(self, value):
         self._value = value
@@ -33,6 +44,7 @@ class String(str):
 
 
 simple_types = [
+    Array,
     Boolean,
     Integer,
     Null,

@@ -1,7 +1,8 @@
 class DataMember:
-    def __init__(self, name, klass):
+    def __init__(self, name, klass, array=False):
         self._name = name
         self._klass = klass
+        self._array = array
 
     @property
     def name(self):
@@ -12,8 +13,13 @@ class DataMember:
         return self._klass
 
     @property
+    def array(self):
+        return self._array
+
+    @property
     def json(self):
         return {
             'name': self.name,
             'class': self.klass,
+            'array': self.array
         }

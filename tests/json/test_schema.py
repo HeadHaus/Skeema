@@ -81,6 +81,21 @@ class TestJsonSchema:
             expected_representation = Representation('Test', ['String'], parameters, data_members)
             assert representation == expected_representation
 
+        def test_creates_the_expected_representation_with_root_type_array(self, manager):
+            kv = {
+                "type": "array",
+                "items": {
+                    "type": "number"
+                }
+            }
+            schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
+            context = schema.compile()
+            representation = context.get_representation('Test')
+            data_members = [DataMember('value', 'Number', True)]
+            parameters = [Parameter('value', 'Number', data_members[0], True, True)]
+            expected_representation = Representation('Test', ['Array'], parameters, data_members)
+            assert representation == expected_representation
+
         def test_creates_representations_for_each_property(self, manager):
             kv = {
                 "type": "object",

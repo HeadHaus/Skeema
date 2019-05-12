@@ -88,6 +88,35 @@ class TestCompiler:
             s = TestString('Hello, world!')
             assert s == 'Hello, world!'
 
+        def test_creates_class_from_array(self, compiler, manager):
+            json = {
+                'type': 'array',
+                'items': {
+                    'type': 'integer'
+                }
+            }
+            schema = manager.create_schema('schemas/array.json', 'TestArray', json)
+            context = schema.compile()
+            compiler.compile(context)
+
+            from skeema import TestArray
+
+            parameters = list(signature(TestArray).parameters.values())
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='[Integer]')]
+            assert parameters == expected_parameters
+
+            s = TestArray([0, 1, 2])
+            assert s == [0, 1, 2]
+
+            for i, v in enumerate(s):
+                assert i == v
+
+            s = TestArray([0, 1, 2])
+            i = iter(s)
+            assert next(i) == 0
+            assert next(i) == 1
+            assert next(i) == 2
+
         def test_creates_class_from_object(self, compiler, manager):
             json = {
                 "type": "object",

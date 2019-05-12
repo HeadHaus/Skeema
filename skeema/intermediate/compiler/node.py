@@ -7,15 +7,33 @@ class Node:
 
 
 class ParameterNode(Node):
-    def __init__(self, name: str, klass: str = None):
+    def __init__(self, name: str, klass: str = None, array: bool = False):
         self._name = name
         self._klass = klass
+        self._array = array
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def annotation(self) -> str:
+        annotation = ''
+        if self._klass:
+            if self._array:
+                annotation = f'[{self._klass}]'
+            else:
+                annotation = self._klass
+        return annotation
+
+    def as_dict(self):
+        return {self.name: self.annotation}
 
     def __str__(self):
-        if self._klass:
-            return f'{self._name}: {self._klass}'
-        else:
-            return f'{self._name}'
+        param = self.name
+        if self.annotation is not '':
+            param += f': {self.annotation}'
+        return param
 
 
 class ParameterListNode(Node):
@@ -28,6 +46,12 @@ class ParameterListNode(Node):
     @property
     def parameters(self):
         return [parameter_node() for parameter_node in self._parameter_nodes]
+
+    def as_dict(self):
+        param_dict = {}
+        for parameter_node in self._parameter_nodes:
+            param_dict.update(parameter_node.as_dict())
+        return param_dict
 
     def __len__(self):
         return len(self._parameter_nodes)
@@ -51,6 +75,9 @@ class SignatureNode(Node):
     @property
     def parameters(self):
         return self._parameter_list_node.parameters
+
+    def as_dict(self):
+        return self._parameter_list_node.as_dict()
 
     def __str__(self):
         return f'def {self._name}({self._parameter_list_node()}):\n'

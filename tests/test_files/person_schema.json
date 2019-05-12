@@ -1,0 +1,22 @@
+{
+  "title": "JSON schema for Person",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "object",
+  
+  "definitions": {
+	"dateOfBirth": "string"
+  },
+
+  "properties": {
+    "firstName": {
+		"type": "string"
+	},
+	"lastName": {
+		"type": "string"
+	},
+	"dateOfBirth": {
+		"$ref": "#/definitions/dateOfBirth"
+	}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "title": "JSON schema for Address",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "object",
+
+  "properties": {
+    "owner": {
+		"$ref": "./person_schema.json"
+	}
+  }
+}

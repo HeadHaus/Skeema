@@ -41,5 +41,6 @@ class Parameter:
         return {
             'name': self.name,
             'class': self.klass,
+            'array': self.array,
             'data_member': self.data_member.name
         }
