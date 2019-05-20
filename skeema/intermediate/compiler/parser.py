@@ -4,6 +4,18 @@ from inspect import signature
 
 import skeema
 
+
+def is_annotation_pod(annotation):
+    pods = [
+        'bool',
+        'int',
+        'float',
+        'list',
+        'str',
+    ]
+    return annotation in pods
+
+
 class Parser:
     @staticmethod
     def class_lookup(module_name: str, class_name: str):
@@ -21,9 +33,12 @@ class Parser:
         for parameter in init_signature.parameters.values():
             param_name = parameter.name
             param_names.append(param_name)
-            klass_name = parameter.annotation
-            param_klass = Parser.class_lookup(module_name, klass_name)
-            klasses.append(param_klass)
+            annotation = parameter.annotation
+            if is_annotation_pod(annotation):
+                annotation_class = getattr(sys.modules['builtins'], annotation)
+            else:
+                annotation_class = Parser.class_lookup(module_name, annotation)
+            klasses.append(annotation_class)
         param_name_klasses = zip(param_names, klasses)
 
         simple_types = [

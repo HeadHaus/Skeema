@@ -20,8 +20,8 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            data_members = [DataMember('value', 'Boolean')]
-            parameters = [Parameter('value', 'Boolean', data_members[0], True, False)]
+            data_members = []
+            parameters = [Parameter('value', 'bool', None, True, False)]
             expected_representation = Representation('Test', ['Boolean'], parameters, data_members)
             assert representation == expected_representation
 
@@ -32,8 +32,8 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            data_members = [DataMember('value', 'Integer')]
-            parameters = [Parameter('value', 'Integer', data_members[0], True, False)]
+            data_members = []
+            parameters = [Parameter('value', 'int', None, True, False)]
             expected_representation = Representation('Test', ['Integer'], parameters, data_members)
             assert representation == expected_representation
 
@@ -54,8 +54,8 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            data_members = [DataMember('value', 'Number')]
-            parameters = [Parameter('value', 'Number', data_members[0], True, False)]
+            data_members = []
+            parameters = [Parameter('value', 'float', None, True, False)]
             expected_representation = Representation('Test', ['Number'], parameters, data_members)
             assert representation == expected_representation
 
@@ -66,7 +66,34 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            expected_representation = Representation('Test', [], [], [])
+            data_members = []
+            parameters = []
+            expected_representation = Representation('Test', ['Object'], parameters, data_members)
+            assert representation == expected_representation
+
+        def test_creates_the_expected_representation_with_root_type_object_and_properties(self, manager):
+            kv = {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "age": {"type": "string"},
+                    "gender": {"type": "string"}
+                }
+            }
+            schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
+            context = schema.compile()
+            representation = context.get_representation('Test')
+            data_members = [
+                DataMember('name', 'NameClass'),
+                DataMember('age', 'AgeClass'),
+                DataMember('gender', 'GenderClass')
+            ]
+            parameters = [
+                Parameter('name', 'NameClass', data_members[0]),
+                Parameter('age', 'AgeClass', data_members[1]),
+                Parameter('gender', 'GenderClass', data_members[2])
+            ]
+            expected_representation = Representation('Test', ['Object'], parameters, data_members)
             assert representation == expected_representation
 
         def test_creates_the_expected_representation_with_root_type_string(self, manager):
@@ -76,8 +103,8 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            data_members = [DataMember('value', 'String')]
-            parameters = [Parameter('value', 'String', data_members[0], True, False)]
+            data_members = []
+            parameters = [Parameter('value', 'str', None, True, False)]
             expected_representation = Representation('Test', ['String'], parameters, data_members)
             assert representation == expected_representation
 
@@ -91,8 +118,8 @@ class TestJsonSchema:
             schema = manager.create_schema('schemas/test/test.json', 'Test', kv)
             context = schema.compile()
             representation = context.get_representation('Test')
-            data_members = [DataMember('value', 'Number', True)]
-            parameters = [Parameter('value', 'Number', data_members[0], True, True)]
+            data_members = []
+            parameters = [Parameter('value', 'float', None, True, True)]
             expected_representation = Representation('Test', ['Array'], parameters, data_members)
             assert representation == expected_representation
 

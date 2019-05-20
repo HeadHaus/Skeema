@@ -3,11 +3,11 @@ from __future__ import annotations
 import sys
 from types import FunctionType
 
-from .operator import itemgetter, itemsetter
 from .node import *
-from skeema import Boolean
 from skeema.intermediate import DataMember, Parameter
 from skeema.intermediate.compiler.parser import Parser
+
+from skeema import ModelMeta
 
 
 def private(name):
@@ -49,91 +49,39 @@ class ClassBuilder:
         return getattr(module, class_name)
 
     @staticmethod
-    def create_class(class_name: str, base_classes: [str], parameters: [Parameter], data_members: [DataMember]):
+    def create_class(class_name: str, base_classes: [str], parameters: [dict], data_members: [dict]):
         module_name = 'skeema'
 
         # Populate a dictionary of property accessors
         cls_dict = dict()
 
-        def getitem(self, key: str):
-            data_member_name = private(key)
-            return self.__dict__[data_member_name]
-
-        # Enables use of itemgetter
-        cls_dict['__getitem__'] = getitem
-
-        data_member_class_map = {
-            data_member['name']: ClassBuilder.class_lookup(module_name, data_member['class'])
-            for data_member in data_members
-        }
-
-        def setitem(self, key: str, value: any):
-            value_klass = type(value)
-            expected_klass = data_member_class_map[key]
-
-            def check_type(_value_klass, _expected_klass):
-                # The value is valid if its class is part of the expected class hierarchy
-                # e.g., str is part of the String hierarchy
-                valid = _value_klass in _expected_klass.__mro__
-                # The value is valid if it is a bool, and the expected class is part of the Boolean hierarchy
-                valid = valid or (_value_klass is bool and issubclass(_expected_klass, Boolean))
-                if not valid:
-                    raise TypeError(
-                        f'Invalid type for {key} = {value}: expected type {_expected_klass}, received type {_value_klass}')
-
-            if value_klass is list:
-                for item in value:
-                    item_klass = type(item)
-                    check_type(item_klass, expected_klass)
-            else:
-                check_type(value_klass, expected_klass)
-                if value_klass is not expected_klass:
-                    # The value class is a sub or supertype.
-                    # Cast value to expected class
-                    value = expected_klass(value)
-
-            data_member_name = private(key)
-            self.__dict__[data_member_name] = value
-
-        # Enables use of itemsetter
-        cls_dict['__setitem__'] = setitem
-
-        cls_dict.update({
-            name: property(
-                itemgetter(name),
-                itemsetter(name)
-            ) for name in (data_member['name'] for data_member in data_members)
-        })
-
-        parameter_nodes = [
-            ParameterNode(
-                parameter['name'],
-                parameter['class'],
-                parameter['array']
-            ) for parameter in parameters]
-        parameter_list_nodes = ParameterListNode(parameter_nodes)
-        signature_node = SignatureNode('__init__', parameter_list_nodes)
-
-        assignment_nodes = [
-            AssignmentNode(
-                ValueNode(f'self.{data_member}'),
-                ValueNode(value)
-            ) for data_member, value in [(parameter['data_member'], parameter['name']) for parameter in parameters]
-        ]
-
-        init_node = MethodNode(signature_node, assignment_nodes)
-        init = ClassBuilder.compile_function(init_node)
-        cls_dict['__init__'] = init
-
         # Parsing for json
-        def parse(cls, json_str):
+        def parse(cls, json_str: str):
             return Parser.parse(cls, json_str)
         cls_dict['parse'] = classmethod(parse)
 
-        cls = type(
+        def decorate(annotation: str, array: bool) -> str:
+            if array:
+                return f'[{annotation}]'
+            else:
+                return annotation
+
+        parameter_annotation_dict = {
+            name: decorate(annotation, array) for name, annotation, array in
+            ((parameter['name'], parameter['class'], parameter['array']) for parameter in parameters)
+        }
+
+        data_member_dict = {
+            name: decorate(annotation, array) for name, annotation, array in
+            ((data_member['name'], data_member['class'], data_member['array']) for data_member in data_members)
+        }
+
+        cls = ModelMeta(
             class_name,
             tuple(ClassBuilder.class_lookup(module_name, base_class) for base_class in base_classes),
-            cls_dict
+            cls_dict,
+            parameters=parameter_annotation_dict,
+            data_members=data_member_dict
         )
 
         ClassBuilder.set_class_module(cls, module_name)

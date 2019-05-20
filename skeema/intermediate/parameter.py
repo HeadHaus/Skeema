@@ -42,5 +42,5 @@ class Parameter:
             'name': self.name,
             'class': self.klass,
             'array': self.array,
-            'data_member': self.data_member.name
+            'data_member': self.data_member.name if self.data_member else None
         }

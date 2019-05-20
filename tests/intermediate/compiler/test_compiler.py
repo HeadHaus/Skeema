@@ -25,7 +25,7 @@ class TestCompiler:
 
             from skeema import TestBoolean
             parameters = list(signature(TestBoolean).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Boolean')]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='bool')]
             assert parameters == expected_parameters
 
             b = TestBoolean(False)
@@ -41,7 +41,7 @@ class TestCompiler:
 
             from skeema import TestInteger
             parameters = list(signature(TestInteger).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Integer')]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='int')]
             assert parameters == expected_parameters
 
             i = TestInteger(124)
@@ -67,7 +67,7 @@ class TestCompiler:
             from skeema import TestNumber
 
             parameters = list(signature(TestNumber).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='Number')]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='float')]
             assert parameters == expected_parameters
 
             n = TestNumber(3.141592653)
@@ -82,7 +82,7 @@ class TestCompiler:
             from skeema import TestString
 
             parameters = list(signature(TestString).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='String')]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='str')]
             assert parameters == expected_parameters
 
             s = TestString('Hello, world!')
@@ -102,7 +102,7 @@ class TestCompiler:
             from skeema import TestArray
 
             parameters = list(signature(TestArray).parameters.values())
-            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='[Integer]')]
+            expected_parameters = [Parameter('value', kind=_ParameterKind.POSITIONAL_OR_KEYWORD, annotation='[int]')]
             assert parameters == expected_parameters
 
             s = TestArray([0, 1, 2])

@@ -1,3 +1,4 @@
+import sys
 from abc import abstractmethod, ABCMeta
 
 from skeema.intermediate.parameter import Parameter
@@ -42,10 +43,15 @@ class Type(Keyword):
         class_type = self.data
         class_context.class_type = class_type
 
-        if class_type is 'object' or class_type is 'null':
+        is_array = False
+
+        if class_type is 'object':
+            class_context.base_classes.append('Object')
             return True
 
-        is_array = False
+        if class_type is 'null':
+            return True
+
         if class_type is 'array':
             is_array = True
             items = schema.key_value_definition['items']
@@ -55,29 +61,33 @@ class Type(Keyword):
                 self.error_message = 'Invalid array type'
                 return False
 
-        klass = to_camel_case(class_type)
+        klass_name = to_camel_case(class_type)
 
         # Do not extend the klass type if the object is an array
         if is_array:
             class_context.base_classes.append('Array')
         else:
-            class_context.base_classes.append(klass)
+            class_context.base_classes.append(klass_name)
 
-        data_member_values = dict()
-        data_member_values['name'] = "value"
-        data_member_values['klass'] = klass
-        data_member_values['array'] = is_array
-        data_member = DataMember(**data_member_values)
-        class_context.add_data_member(data_member)
+        # data_member_values = dict()
+        # data_member_values['name'] = "value"
+        # data_member_values['klass'] = klass
+        # data_member_values['array'] = is_array
+        # data_member = DataMember(**data_member_values)
+        # class_context.add_data_member(data_member)
 
-        constructor_parameter_values = dict()
-        constructor_parameter_values['name'] = "value"
-        constructor_parameter_values['klass'] = klass
-        constructor_parameter_values['data_member'] = data_member
-        constructor_parameter_values['required'] = False
-        constructor_parameter_values['array'] = is_array
-        parameter = Parameter(**constructor_parameter_values)
-        class_context.add_constructor_parameter(parameter)
+        m = sys.modules['skeema']
+        if hasattr(m, klass_name):
+            klass = getattr(m, klass_name)
+            for name, annotation in klass.annotations.items():
+                constructor_parameter_values = dict()
+                constructor_parameter_values['name'] = name
+                constructor_parameter_values['klass'] = annotation
+                constructor_parameter_values['data_member'] = None
+                constructor_parameter_values['required'] = False
+                constructor_parameter_values['array'] = is_array
+                parameter = Parameter(**constructor_parameter_values)
+                class_context.add_constructor_parameter(parameter)
 
         return True
 
