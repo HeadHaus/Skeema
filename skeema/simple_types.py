@@ -1,38 +1,14 @@
 from __future__ import annotations
 
 import sys
-import re
 from inspect import Signature, Parameter, _POSITIONAL_OR_KEYWORD
 
 from typing import TYPE_CHECKING
 
+from skeema import util
+
 if TYPE_CHECKING:
     pass
-
-
-def is_annotation_pod(annotation):
-    pods = [
-        'bool',
-        'int',
-        'float',
-        'list',
-        'str',
-    ]
-    return annotation in pods
-
-
-def is_annotation_array(annotation):
-    regex = r'\[...\]'
-    result = re.match(regex, annotation)
-    return result is not None
-
-
-def class_lookup(module_name: str, class_name: str):
-    _module = sys.modules[module_name]
-    if hasattr(_module, class_name):
-        return getattr(_module, class_name)
-    else:
-        return None
 
 
 class ModelMeta(type):
@@ -140,19 +116,19 @@ class ModelMeta(type):
         def set_attribute(self, name, value):
             print(f'SETTING ATTR {name}: {value}')
             annotation = self.klass.annotation(name)
-            if is_annotation_pod(annotation):
+            if util.is_annotation_pod(annotation):
                 annotation_class = getattr(sys.modules['builtins'], annotation)
                 if type(value) is annotation_class:
                     object.__setattr__(self, name, value)
                 else:
                     raise TypeError
-            elif is_annotation_array(annotation):
+            elif util.is_annotation_array(annotation):
                 if type(value) is list:
                     object.__setattr__(self, name, value)
                 else:
                     raise TypeError
             else:
-                annotation_klass = class_lookup(self.__module__, annotation)
+                annotation_klass = util.class_lookup(self.__module__, annotation)
                 if hasattr(annotation_klass, 'type_check') and annotation_klass.type_check(value):
                     object.__setattr__(self, name, value)
                 else:
